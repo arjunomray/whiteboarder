@@ -21,19 +21,29 @@ socket.onmessage = function (event) {
     }
 };
 
-// Start drawing when mouse is pressed
+// Start drawing when mouse is pressed or touch starts
 canvas.addEventListener("mousedown", (e) => {
     drawing = true;
     currentX = e.offsetX;
     currentY = e.offsetY;
 });
+canvas.addEventListener("touchstart", (e) => {
+    drawing = true;
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    currentX = touch.clientX - rect.left;
+    currentY = touch.clientY - rect.top;
+});
 
-// Stop drawing when mouse is released
+// Stop drawing when mouse is released or touch ends
 canvas.addEventListener("mouseup", () => {
     drawing = false;
 });
+canvas.addEventListener("touchend", () => {
+    drawing = false;
+});
 
-// Draw on canvas when moving mouse
+// Draw on canvas when moving mouse or touch moves
 canvas.addEventListener("mousemove", (e) => {
     if (!drawing) return;
     const x = e.offsetX;
@@ -45,6 +55,21 @@ canvas.addEventListener("mousemove", (e) => {
 
     currentX = x;
     currentY = y;
+});
+canvas.addEventListener("touchmove", (e) => {
+    if (!drawing) return;
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    drawLine(currentX, currentY, x, y, currentColor);
+    // Send drawing data to the server via WebSocket
+    socket.send(JSON.stringify({ startX: currentX, startY: currentY, endX: x, endY: y, color: currentColor }));
+
+    currentX = x;
+    currentY = y;
+    e.preventDefault(); // Prevent scrolling when drawing
 });
 
 // Helper function to draw a line on the canvas
