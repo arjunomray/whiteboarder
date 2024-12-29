@@ -4,7 +4,7 @@ let currentY = 0;
 let currentColor = getRandomColor(); // Generate a random color for each user
 
 // Initialize WebSocket connection
-const socket = new WebSocket("ws://localhost:8080/ws");
+const socket = new WebSocket(window.WEBSOCKET_URL);
 
 const canvas = document.getElementById("drawingCanvas");
 const ctx = canvas.getContext("2d");

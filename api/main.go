@@ -3,12 +3,25 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"whiteboarder/handler"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	websocketURL := os.Getenv("WEBSOCKET_URL")
+	fmt.Println(websocketURL)
+	if websocketURL == "" {
+		websocketURL = "ws://localhost:8080/ws"
+	}
 
 	r := gin.Default()
 
@@ -16,7 +29,9 @@ func main() {
 	r.LoadHTMLFiles("templates/index.html")
 
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(200, "index.html", nil)
+		c.HTML(200, "index.html", gin.H{
+			"websocketURL": websocketURL,
+		})
 	})
 
 	r.GET("/ws", handler.HandleConnection)
